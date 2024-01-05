@@ -22,7 +22,7 @@ ansible-galaxy collection install pytoccaz.keycloak
 ### Modules
 Name | Description
 --- | ---
-[pytoccaz.keycloak.get_token](https://github.com/pytoccaz/ansible_keycloak/blob/main/docs/pytoccaz.keycloak.get_token_module.rst)|Retrieves auth token for Keycloak API
+[pytoccaz.keycloak.kc_get_token](https://github.com/pytoccaz/ansible_keycloak/blob/main/docs/pytoccaz.keycloak.kc_get_token_module.rst)|Retrieves auth token for Keycloak API
 
 <!--end collection content-->
 

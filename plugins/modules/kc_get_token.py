@@ -17,7 +17,7 @@ __metaclass__ = type
 
 DOCUMENTATION = '''
 ---
-module: get_token
+module: kc_get_token
 
 short_description: Retrieves auth token for Keycloak API
 
@@ -68,6 +68,16 @@ options:
         aliases:
           - password
 
+    auth_scope:
+        description:
+            - Scope parameters.
+        type: list
+        elements: str
+        aliases:
+          - scope
+          - scope_parameters
+        version_added: 1.1.0
+
     validate_certs:
         description:
             - Verify TLS certificates (do not disable this in production).
@@ -93,12 +103,24 @@ author:
 
 EXAMPLES = '''
 - name: Get a Keycloak token
-  pytoccaz.keycloak.get_token:
+  pytoccaz.keycloak.kc_get_token:
     auth_client_id: admin-cli
     auth_keycloak_url: https://auth.example.com/auth
     auth_realm: master
     auth_username: USERNAME
     auth_password: PASSWORD
+  delegate_to: localhost
+  no_log: true
+
+- name: Get a Keycloak token for openid connect authentication
+  pytoccaz.keycloak.kc_get_token:
+    auth_client_id: admin-cli
+    auth_keycloak_url: https://auth.example.com/auth
+    auth_realm: master
+    auth_username: USERNAME
+    auth_password: PASSWORD
+    auth_scope:
+      - openid
   delegate_to: localhost
   no_log: true
 '''
@@ -119,25 +141,6 @@ import json
 
 
 URL_TOKEN = "{url}/realms/{realm}/protocol/openid-connect/token"
-
-
-def keycloak_argument_spec():
-    """
-    Returns argument_spec of options common to keycloak_*-modules
-
-    :return: argument_spec dict
-    """
-    return dict(
-        auth_keycloak_url=dict(type='str', aliases=[
-                               'url'], required=True, no_log=False),
-        auth_client_id=dict(type='str', default='admin-cli'),
-        auth_realm=dict(type='str'),
-        auth_username=dict(type='str', aliases=['username']),
-        auth_password=dict(type='str', aliases=['password'], no_log=True),
-        validate_certs=dict(type='bool', default=True),
-        connection_timeout=dict(type='int', default=10),
-        http_agent=dict(type='str', default='Ansible'),
-    )
 
 
 class KeycloakError(Exception):
@@ -162,6 +165,7 @@ def get_token(module_params):
     client_id = module_params.get('auth_client_id')
     auth_username = module_params.get('auth_username')
     auth_password = module_params.get('auth_password')
+    auth_scope = module_params.get('auth_scope')
     connection_timeout = module_params.get('connection_timeout')
     auth_url = URL_TOKEN.format(url=base_url, realm=auth_realm)
     temp_payload = {
@@ -170,6 +174,10 @@ def get_token(module_params):
         'username': auth_username,
         'password': auth_password,
     }
+
+    if auth_scope is not None and len(auth_scope) > 0:
+        temp_payload['scope'] = ' '.join(auth_scope)
+
     # Remove empty items
     payload = dict(
         (k, v) for k, v in temp_payload.items() if v is not None)
@@ -198,7 +206,17 @@ def main():
     Module get_token
     """
 
-    argument_spec = keycloak_argument_spec()
+    argument_spec = dict(
+        auth_keycloak_url=dict(type='str', aliases=['url'], required=True, no_log=False),
+        auth_client_id=dict(type='str', default='admin-cli'),
+        auth_realm=dict(type='str'),
+        auth_username=dict(type='str', aliases=['username']),
+        auth_password=dict(type='str', aliases=['password'], no_log=True),
+        auth_scope=dict(type='list', elements='str', aliases=['scope', 'scope_parameters']),
+        validate_certs=dict(type='bool', default=True),
+        connection_timeout=dict(type='int', default=10),
+        http_agent=dict(type='str', default='Ansible'),
+    )
 
     module = AnsibleModule(
         argument_spec=argument_spec,

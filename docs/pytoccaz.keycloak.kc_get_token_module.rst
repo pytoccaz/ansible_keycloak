@@ -1,9 +1,9 @@
-.. _pytoccaz.keycloak.get_token_module:
+.. _pytoccaz.keycloak.kc_get_token_module:
 
 
-***************************
-pytoccaz.keycloak.get_token
-***************************
+******************************
+pytoccaz.keycloak.kc_get_token
+******************************
 
 **Retrieves auth token for Keycloak API**
 
@@ -101,6 +101,24 @@ Parameters
             <tr>
                 <td colspan="1">
                     <div class="ansibleOptionAnchor" id="parameter-"></div>
+                    <b>auth_scope</b>
+                    <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
+                    <div style="font-size: small">
+                        <span style="color: purple">list</span>
+                         / <span style="color: purple">elements=string</span>
+                    </div>
+                    <div style="font-style: italic; font-size: small; color: darkgreen">added in 1.1.0</div>
+                </td>
+                <td>
+                </td>
+                <td>
+                        <div>Scope parameters.</div>
+                        <div style="font-size: small; color: darkgreen"><br/>aliases: scope, scope_parameters</div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="1">
+                    <div class="ansibleOptionAnchor" id="parameter-"></div>
                     <b>auth_username</b>
                     <a class="ansibleOptionLink" href="#parameter-" title="Permalink to this option"></a>
                     <div style="font-size: small">
@@ -177,12 +195,24 @@ Examples
 .. code-block:: yaml
 
     - name: Get a Keycloak token
-      pytoccaz.keycloak.get_token:
+      pytoccaz.keycloak.kc_get_token:
         auth_client_id: admin-cli
         auth_keycloak_url: https://auth.example.com/auth
         auth_realm: master
         auth_username: USERNAME
         auth_password: PASSWORD
+      delegate_to: localhost
+      no_log: true
+
+    - name: Get a Keycloak token for openid connect authentication
+      pytoccaz.keycloak.kc_get_token:
+        auth_client_id: admin-cli
+        auth_keycloak_url: https://auth.example.com/auth
+        auth_realm: master
+        auth_username: USERNAME
+        auth_password: PASSWORD
+        auth_scope:
+          - openid
       delegate_to: localhost
       no_log: true
 
